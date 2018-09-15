@@ -19,7 +19,8 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 class Label(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(128), primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
     label = db.Column(db.String(40), unique=True, nullable=False)
 
     def __repr__(self):
@@ -27,8 +28,7 @@ class Label(db.Model):
 
 @app.route('/')
 def test():
-    links = ('upload', 'sendstr<string>', 'sendimg', 'getlabels')
-    return links
+    return 'upload, ' + 'sendstr<string>, ' + ', sendimg' + ', getlabels'
 
 @app.route('/upload')
 def upload_html():
@@ -42,18 +42,21 @@ def upload_file():
 
 @app.route('/sendstr/<string>')
 def send_str(string):
-    hash_str = sha256(string.encode('utf8')).hexdigest()
-    db.session.add(Label(id=hash_str, label=string))
-    db.session.commit()
     return 'Received ' + string
 
 @app.route('/getimg')
-def send_img():
+def get_img():
     return send_file('./img/cat.1.jpg', mimetype='image/jpg')
 
-@app.route('/sendlabel')
-def send_label():
-    pass
+@app.route('/sendlabel/<param>')
+def send_label(param):
+    img, lab = param.split('=')
+    img = img.encode('utf-8')
+    lab = lab.encode('utf-8')
+    hash_str = sha256(img).hexdigest()
+    db.session.add(Label(id=hash_str, name=img, label=lab))
+    db.session.commit()
+    return 'Received %s; %s; %s' % (hash_str, img, lab)
 
 @app.route('/getlabels', methods=['GET'])
 def get_labels():
