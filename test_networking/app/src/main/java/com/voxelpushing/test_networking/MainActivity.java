@@ -31,12 +31,19 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,29 +52,75 @@ public class MainActivity extends AppCompatActivity {
     // The image that you drag
     ImageView move;
     // Just one drag target for now
-    ImageView top;
-    ImageSet imageSet;
+    TextView top;
+    // static ImageSet imageSet;
+    TextView right;
+    TextView left;
+    TextView bottom;
+
+    String[] imgList = {"img1.jpg", "img2.jpg",
+            "img3.jpg",
+            "img4.jpg",
+            "img5.jpg",
+            "img6.jpg",
+            "img7.jpg",
+            "img8.jpg",
+            "img9.jpg",
+            "img10.jpg",
+            "img11.jpg",
+            "img12.jpg",
+            "img13.jpg",
+            "img14.jpg",
+            "img15.jpg",
+            "img16.jpg",
+            "img17.jpg",
+            "img18.jpg",
+            "img19.jpg",
+            "img20.jpg"};
+    String[] lblList = {"cat",
+            "dog",
+            "rabbit",
+            "horse"};
+    int i = 0;
+    String currentImg = imgList[i];
+    String label;
+    String url;
 
     // Lists that hold the images and labels
 
     final String jsonUrl = "http://35.185.87.150:5000/getlabels";
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // target
-        top = findViewById(R.id.top_semicircle);
+        // targets
+        top = findViewById(R.id.top);
+        right = findViewById(R.id.right);
+        left = findViewById(R.id.left);
+        bottom = findViewById(R.id.bottom);
 
-        // setting the OnDragListener for the target
-        top.setOnDragListener(new View.OnDragListener() {
+        final com.android.volley.Response.Listener<String> vlistener = new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    Log.i("Sent", "Good job");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
+        };
+
+        View.OnDragListener listener = new View.OnDragListener() {
             @Override
             public boolean onDrag(final View v, DragEvent dragEvent) {
-                final int action = dragEvent.getAction();
+                // int choice = v.getId();
+//                String shit = Integer.toString(choice);
+//                Log.d("Choice", shit);
 
+                final int action = dragEvent.getAction();
                 switch (action) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         v.invalidate();
@@ -79,58 +132,71 @@ public class MainActivity extends AppCompatActivity {
                         return true;
 
                     case DragEvent.ACTION_DRAG_ENTERED:
-//                        ValueAnimator anim1 = ValueAnimator.ofInt(v.getMeasuredHeight(), 150);
-//                        anim1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                            @Override
-//                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-//                                int val = (Integer) valueAnimator.getAnimatedValue();
-//                                ViewGroup.LayoutParams layoutParams = v.getLayoutParams();
-//                                layoutParams.height = val;
-//                                v.setLayoutParams(layoutParams);
-//                            }
-//                        });
-//                        anim1.setDuration(1000);
-//                        anim1.start();
                         //v.animate().scaleYBy(1f).scaleXBy(1f).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(1000);
                         v.invalidate();
                         return true;
 
                     case DragEvent.ACTION_DROP:
-//                        ValueAnimator anim2 = ValueAnimator.ofInt(v.getMeasuredHeight(), 150);
-//                        anim2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                            @Override
-//                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-//                                int val = (Integer) valueAnimator.getAnimatedValue();
-//                                ViewGroup.LayoutParams layoutParams = v.getLayoutParams();
-//                                layoutParams.height = val;
-//                                v.setLayoutParams(layoutParams);
-//                            }
-//                        });
-//                        anim2.setDuration(1000);
-//                        anim2.start();
                         // v.animate().scaleYBy(-1f).scaleXBy(-1f).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(1000);
-                        Toast.makeText(getApplicationContext(), "drop", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "sent", Toast.LENGTH_SHORT).show();
+                        switch (v.getId()) {
+                            case R.id.top:
+                                label = "cat";
+                                break;
+                            case R.id.right:
+                                label = "horse";
+                                break;
+                            case R.id.bottom:
+                                label = "rabbit";
+                                break;
+                            case R.id.left:
+                                label = "dog";
+                                break;
+                            default:
+                                label = "shit";
+                                break;
+                        }
+                        String url = "http://35.185.87.150:5000/sendlabel/" + currentImg + "=" + label + "=p1";
+                        Log.d("POST URL", url);
+                        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, vlistener,
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+                        requestQueue.add(stringRequest);
+                        i++;
+                        currentImg = imgList[i];
                         v.invalidate();
                         return true;
 
                     case DragEvent.ACTION_DRAG_ENDED:
                         // v.animate().scaleYBy(-1f).scaleXBy(-1f).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(1000);
-                        Toast.makeText(getApplicationContext(), "ended", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getApplicationContext(), "ended", Toast.LENGTH_SHORT).show();
                         View dragView = (View) dragEvent.getLocalState();
                         dragView.setVisibility(View.VISIBLE);
                         return true;
                 }
                 return true;
             }
-        });
+        };
+        // setting the OnDragListener for the target
+        top.setOnDragListener(listener);
+        right.setOnDragListener(listener);
+        left.setOnDragListener(listener);
+        bottom.setOnDragListener(listener);
 
-        loadImageSet();
 
         // finding the ImageView for the draggable image
         move = findViewById(R.id.weimin);
         move.setImageResource(R.drawable.wml);
-        // Log.d("Log URL", imageSet.getImages().get(0));
-        // Picasso.get().load(url).into(move);
+
+        url = "http://35.185.87.150:5000/getimg/" + currentImg;
+        Log.d("URL", url);
+        Picasso.get().load(url).into(move);
+
 
         // Setting the OnTouchListener for the ImageView
         move.setOnTouchListener(new View.OnTouchListener() {
@@ -148,54 +214,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // method to parse JSON and put into a the List<String> above
-    private void loadImageSet() {
-        // Initializing the lists from above
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, jsonUrl, new Response.Listener<String>() {
-
-            List<String> imgList = new ArrayList<>();
-            List<String> lblList = new ArrayList<>();
-
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject obj = new JSONObject(response);
-                    JSONArray imgArray = obj.getJSONArray("img");
-                    JSONArray lblArray = obj.getJSONArray("labels");
-
-                    for (int i = 0; i < imgArray.length(); i++) {
-                        String imgStr = imgArray.getString(i);
-                        // Log.d("Image URL", imgStr);
-                        imgList.add(imgStr);
-                    }
-
-                    for (int i = 0; i < lblArray.length(); i++) {
-                        String lblStr = lblArray.getString(i);
-                        // Log.d("Label", lblStr);
-                        lblList.add(lblStr);
-                    }
-
-                    imageSet = new ImageSet(imgList, lblList);
-                    for (int i = 0; i < imageSet.getImages().size(); i++){
-                        Log.d("Image URL", imageSet.getImages().get(i));
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequest);
-    }
+//
+//    // method to parse JSON and put into a the List<String> above
+//    private void loadImageSet() {
+//        // Initializing the lists from above
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET, jsonUrl, listener,
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//
+//        RequestQueue requestQueue = Volley.newRequestQueue(this);
+//        requestQueue.add(stringRequest);
+//    }
 }
 
 
