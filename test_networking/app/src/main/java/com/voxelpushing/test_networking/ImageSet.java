@@ -2,31 +2,33 @@ package com.voxelpushing.test_networking;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class ImageSet {
     @SerializedName("img")
-    private String[] images;
+    private List<String> images;
 
     @SerializedName("labels")
-    private String[] labels;
+    private List<String> labels;
 
-    public ImageSet(String[] imgs, String[] lbls){
+    public ImageSet(List<String> imgs, List<String> lbls){
         this.images = imgs;
         this.labels = lbls;
     }
 
-    public String[] getImgages(){
+    public List<String> getImages(){
         return images;
     }
 
-    public String[] getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
-    public void setImages(String[] imgs){
+    public void setImages(List<String> imgs){
         this.images = imgs;
     }
 
-    public void setLabels(String[] lbls){
+    public void setLabels(List<String> lbls){
         this.labels = lbls;
     }
 }
