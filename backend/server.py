@@ -116,7 +116,7 @@ class Player(db.Model):
     def __repr__(self):
         return self.name
 
-@app.route('/add/<name>')
+@app.route('/add/<name>', methods=['POST'])
 def add_player(name):
     hash_str = sha256(name).hexdigest()
     db.session.add(Player(id=hash_str, name=name, correct=0, wrong=0, rank=0))
@@ -240,7 +240,11 @@ def send_results(email):
     server.quit()
     
     return 'sent email'
-    
+
+### Reliability
+@app.route('/cluster')
+def cluster():
+    pass
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

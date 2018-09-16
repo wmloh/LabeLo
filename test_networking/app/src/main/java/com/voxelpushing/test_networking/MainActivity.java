@@ -42,8 +42,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String pName = etext.getText().toString();
-                Intent i = new Intent(getApplicationContext(), ClassifyActivity.class);
-                i.putExtra("KEY",pName);
+
                 String url = "http://35.185.87.150:5000/add/" + pName;
                 StringRequest stringRequest = new StringRequest(Request.Method.POST, url, vlistener,
                         new Response.ErrorListener() {
@@ -56,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 requestQueue.add(stringRequest);
 
                 Intent startMatch = new Intent(MainActivity.this, ClassifyActivity.class);
+                startMatch.putExtra("KEY",pName);
                 startActivity(startMatch);
             }
         });
