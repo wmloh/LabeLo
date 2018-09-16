@@ -32,6 +32,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     int i = 0;
     String currentImg = imgList[i];
     String label;
-    String url;
+    String iurl = "http://35.185.87.150:5000/getimg/" + currentImg;
 
     // Lists that hold the images and labels
 
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         left = findViewById(R.id.left);
         bottom = findViewById(R.id.bottom);
 
-        final com.android.volley.Response.Listener<String> vlistener = new Response.Listener<String>() {
+        final Response.Listener<String> vlistener = new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -116,9 +117,6 @@ public class MainActivity extends AppCompatActivity {
         View.OnDragListener listener = new View.OnDragListener() {
             @Override
             public boolean onDrag(final View v, DragEvent dragEvent) {
-                // int choice = v.getId();
-//                String shit = Integer.toString(choice);
-//                Log.d("Choice", shit);
 
                 final int action = dragEvent.getAction();
                 switch (action) {
@@ -167,8 +165,13 @@ public class MainActivity extends AppCompatActivity {
                             });
                         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
                         requestQueue.add(stringRequest);
-                        i++;
+                        if (i < 20){
+                            i++;
+                        } else i = 19;
                         currentImg = imgList[i];
+                        iurl = "http://35.185.87.150:5000/getimg/" + currentImg;
+                        Picasso.get().load(iurl).into(move);
+                        Log.d("New URL", iurl);
                         v.invalidate();
                         return true;
 
@@ -188,15 +191,11 @@ public class MainActivity extends AppCompatActivity {
         left.setOnDragListener(listener);
         bottom.setOnDragListener(listener);
 
-
         // finding the ImageView for the draggable image
         move = findViewById(R.id.weimin);
         move.setImageResource(R.drawable.wml);
 
-        url = "http://35.185.87.150:5000/getimg/" + currentImg;
-        Log.d("URL", url);
-        Picasso.get().load(url).into(move);
-
+        Picasso.get().load(iurl).into(move);
 
         // Setting the OnTouchListener for the ImageView
         move.setOnTouchListener(new View.OnTouchListener() {
